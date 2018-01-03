@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.IDeptDao">
+
+  <select id="getDeptById" resultType="DeptResponse">
+    select * from dept where id = #{id}
+  </select>
+ 
+  <select id="getDeptWithEmps" resultMap="DeptEmp" parameterType="Map">
+  	 select * from dept 
+  	 <where>
+  	 	<if test="name!=null">
+  	 		deptname like concat('%',#{name},'%')
+  	 	</if>
+  	 </where>
+  </select>
+  
+  <resultMap type="DeptResponse" id="DeptEmp">
+  	<collection property="emps" javaType="ArrayList" ofType="EmpResponse" column="id"
+  	select="com.roger.entity.EmpMapper.getByDeptId">
+  	</collection>
+  </resultMap>
+  
+</mapper>

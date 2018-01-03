@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<!-- 启用shrio授权注解拦截方式 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- 装配 securityManager -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 配置登陆页面 -->
+		<property name="loginUrl" value="/login/notlogin" />
+		<!-- 登陆成功后的一面 -->
+		<!-- <property name="successUrl" value="/login/success" /> -->
+		<property name="unauthorizedUrl" value="/login/unauthorized" />
+		<property name="filters">
+			<map>			
+				<entry key="roles">  
+                    <bean  
+                        class="com.demo.shiro.SimpleRolesAuthorizationFilter" />  
+                </entry>  
+                 <entry key="authc">  
+                    <bean  
+                        class="com.demo.shiro.SimpleFormAuthenticationFilter" />  
+                </entry>  
+			</map>
+		</property>
+		<!-- 具体配置需要拦截哪些 URL, 以及访问对应的 URL 时使用 Shiro 的什么 Filter 进行拦截. -->
+		<property name="filterChainDefinitions">
+			<value>
+				  /docApi/**=anon
+				  /v2/**=anon
+				  /login/dologin=anon
+				 <!--  /emp/**=roles["user"] -->
+				 <!-- 剩余其他路径，必须认证通过才可以访问 -->
+			  	 /**=authc
+			</value>
+		</property>
+	</bean>
+	
+
+	 <!-- 数据库保存的密码是使用MD5算法加密的，所以这里需要配置一个密码匹配对象 -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"></bean>
+	
+	<!-- MyBatis使用ehcache缓存 start -->
+	<bean id="ehCacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache-shiro.xml" />
+		<property name="shared" value="true"></property> <!-- 这里是关键！！！没有必错 -->
+	</bean>
+	<!-- end MyBatis使用ehcache缓存 -->
+	<!-- 缓存管理器 使用Ehcache实现 -->
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="ehCacheManager" />
+	</bean>
+
+	<!-- 配置 Shiro 的 SecurityManager Bean. -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="realm" ref="myRealm" />
+	</bean>
+
+	<!-- 配置进行授权和认证的 Realm -->
+	<bean id="myRealm" class="com.demo.shiro.ShiroDbRealm">
+		<property name="userService" ref="userService" />
+	</bean>
+	<bean id="userService" class="com.demo.service.impl.UserServiceImpl" />
+	
+	
+	
+	<!-- 会话管理器 -->
+	<bean id="sessionManager"
+		class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="sessionDAO" ref="sessionDAO" />
+	</bean>
+    <!-- 指定本系统SESSIONID, 默认为: JSESSIONID 问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID,
+        当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失! -->
+    <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg name="name" value="shiro.session.id"/> 
+        <property name="maxAge" value="-1" />  
+    </bean>
+    
+    <!-- 会话ID生成器 -->  
+    <bean id="sessionIdGenerator"  
+        class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator" />
+  	<!-- 会话DAO -->  
+    <bean id="sessionDAO"  
+        class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">  
+        <property name="sessionIdGenerator" ref="sessionIdGenerator" />  
+  	</bean>
+	<!-- <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.MemorySessionDAO" /> -->
+	
+	<!-- 配置 Bean 后置处理器: 会自动的调用和 Spring 整合后各个组件的生命周期方法. -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	
+ 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>  
+ 	
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">  
+        <property name="securityManager" ref="securityManager"/>  
+    </bean>
+	
+</beans>  

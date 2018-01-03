@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.IEmpDao">
+
+
+
+	<resultMap type="EmpResponse" id="EmpDept">
+  		<association property="dept" column="dept_id" javaType="DeptResponse" select="com.demo.dao.IDeptDao.getDeptById"></association>
+  	</resultMap>
+	
+	<select id="getEmpList" resultMap="EmpDept">
+  		select * from emp
+  	</select>	
+
+	<select id="getEmpByUsername" resultType="EmpResponse" parameterType="EmpRequest">
+		select * from emp
+		<where>
+			<if test="username != null">
+				empname = #{username}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="addEmp" parameterType="UserResponse" useGeneratedKeys="true" keyProperty="id">
+  		insert into emp(empname,age) values(#{username},#{age})
+  	</insert>
+
+	<update id="updateEmp" parameterType="EmpRequest">
+		 update emp
+		    <set>
+		      <if test="empname != null">empname=#{empname},</if>
+		      <if test="email != null">email=#{email},</if>
+		      <if test="age != null">age=#{age},</if>
+		      <if test="birthday != null">birthday=#{birthday},</if>
+		      <if test="deptId != null">dept_id=#{deptId},</if>
+		      <if test="bonus != null">bonus=${bonus}</if>
+		    </set>
+		  where id=#{id}
+	</update>
+	
+	<delete id="deleteEmp" parameterType="int">
+		 delete from emp where id=#{id}
+	</delete>
+
+
+</mapper>

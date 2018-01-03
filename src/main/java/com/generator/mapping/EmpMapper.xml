@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.generator.IDao.EmpMapper">
+  <resultMap id="BaseResultMap" type="com.generator.domain.Emp">
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="empname" jdbcType="VARCHAR" property="empname" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="birthday" jdbcType="DATE" property="birthday" />
+    <result column="deptId" jdbcType="INTEGER" property="deptid" />
+    <result column="bonus" jdbcType="DOUBLE" property="bonus" />
+  </resultMap>
+  <resultMap id="BaseResultMap" type="com.generator.domain.Emp">
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="empname" jdbcType="VARCHAR" property="empname" />
+    <result column="salary" jdbcType="DOUBLE" property="salary" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="birthday" jdbcType="DATE" property="birthday" />
+    <result column="deptId" jdbcType="INTEGER" property="deptid" />
+    <result column="bonus" jdbcType="DOUBLE" property="bonus" />
+  </resultMap>
+</mapper>

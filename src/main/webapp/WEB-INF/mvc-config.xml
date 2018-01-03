@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+    <!-- Uncomment and your base-package here:
+         <context:component-scan
+            base-package="org.springframework.samples.web"/>  -->
+
+	<context:annotation-config />
+	 <aop:config proxy-target-class="true"></aop:config>
+    <mvc:annotation-driven validator="validator"/>
+    
+     <!-- Enables swgger ui-->
+     <mvc:resources mapping="*.html" location="/"/>
+     <mvc:resources mapping="/**" location="/"/>
+    
+   
+    <context:component-scan  base-package="com.demo"/>
+    
+     <!-- Swagger 注入 -->
+    <bean name="SwaggerConfig" class="com.demo.utils.SwaggerConfig"/>
+    <!-- json转换 -->
+	<bean id="stringConverter"  
+        class="org.springframework.http.converter.StringHttpMessageConverter">  
+        <property name="supportedMediaTypes">  
+            <list>  
+                <value>text/plain;charset=UTF-8</value>  
+            </list>  
+        </property>  
+    </bean>  
+    
+    <!-- json转换 -->
+    <bean id="jsonConverter"  
+        class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"></bean>  
+   
+    <bean  
+        class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">  
+        <property name="messageConverters">  
+            <list>  
+                <ref bean="stringConverter" />  
+                <ref bean="jsonConverter" />  
+            </list>  
+        </property>  
+    </bean>  
+    
+     <!-- 数据验证 -->
+    <bean id="messageSource"
+          class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basename" value="classpath:validator/errors" />
+    </bean>
+     
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+    		<property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>  
+        <property name="validationMessageSource" ref="messageSource"/>
+    </bean>
+    
+    <!-- <mvc:interceptors>
+	    <mvc:interceptor>
+	        <mvc:mapping path="/**"/>
+	        <mvc:exclude-mapping path="/docApi/**"/>
+			<mvc:exclude-mapping path="/v2/**"/>
+	        <bean class="com.demo.interceptor.MyInterceptor"/>
+	    </mvc:interceptor>
+	</mvc:interceptors>
+     -->
+    
+	<!-- 配置视图渲染器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	        <property name="prefix" value="/WEB-INF/view/"/>
+	        <property name="suffix" value=".jsp"/>
+	</bean>
+	
+	
+	
+	
+</beans>
